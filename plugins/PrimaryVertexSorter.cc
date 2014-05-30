@@ -32,6 +32,8 @@
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "DataFormats/BTauReco/interface/TrackIPTagInfo.h"
+
 #include "RecoVertex/PrimaryVertexSorter/interface/PVSortingAlgo.h"
 
 //
@@ -57,6 +59,8 @@ class PrimaryVertexSorter : public edm::EDProducer {
 
       // ----------member data ---------------------------
       const edm::InputTag src_;
+      const edm::InputTag ipTagInfos_;
+      const double jetPtMin_;
 
       reco::PVSortingAlgo sortingAlgo;
 };
@@ -74,7 +78,9 @@ class PrimaryVertexSorter : public edm::EDProducer {
 // constructors and destructor
 //
 PrimaryVertexSorter::PrimaryVertexSorter(const edm::ParameterSet& iConfig) :
-   src_(iConfig.getParameter<edm::InputTag>("src"))
+   src_(iConfig.getParameter<edm::InputTag>("src")),
+   ipTagInfos_(iConfig.getParameter<edm::InputTag>("ipTagInfos")),
+   jetPtMin_(iConfig.getParameter<double>("jetPtMin"))
 {
    //register your products
    produces<reco::VertexCollection>();
@@ -105,8 +111,12 @@ PrimaryVertexSorter::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
    edm::Handle<reco::VertexCollection> primaryVertices;
    iEvent.getByLabel(src_,primaryVertices);
 
+   // get IPTagInfos
+   edm::Handle<reco::TrackIPTagInfoCollection> ipTagInfos;
+   iEvent.getByLabel(ipTagInfos_,ipTagInfos);
+
    // get sorted indices
-   std::vector<unsigned int> sortedIndices = sortingAlgo.getSortedIndices(primaryVertices);
+   std::vector<unsigned int> sortedIndices = sortingAlgo.getSortedIndices(primaryVertices,ipTagInfos,jetPtMin_);
 
    std::auto_ptr<reco::VertexCollection> pvs(new reco::VertexCollection());
 

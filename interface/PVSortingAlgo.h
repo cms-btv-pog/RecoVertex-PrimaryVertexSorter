@@ -3,7 +3,7 @@
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-
+#include "DataFormats/BTauReco/interface/TrackIPTagInfo.h"
 
 typedef std::pair<unsigned int, double> SortingPair;
 
@@ -21,10 +21,12 @@ namespace reco
 class PVSortingAlgo
 {
   public:
-    std::vector<unsigned int> getSortedIndices(const edm::Handle<reco::VertexCollection> & primaryVertices) const;
+    std::vector<unsigned int> getSortedIndices(const edm::Handle<reco::VertexCollection> & primaryVertices,
+                                               const edm::Handle<reco::TrackIPTagInfoCollection> & ipTagInfos,
+                                               double jetPtMin) const;
 
   private:
-    double sortingValue(const reco::Vertex & v) const;
+    double trackPt2(const reco::TrackRef & trk) const;
 };
 
 }
