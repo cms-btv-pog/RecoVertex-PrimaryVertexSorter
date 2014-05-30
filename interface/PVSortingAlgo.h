@@ -2,6 +2,18 @@
 #define RecoVertex_PrimaryVertexSorter_PVSortingAlgo_H
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+
+
+typedef std::pair<unsigned int, double> SortingPair;
+
+struct sortByValue
+{
+  bool operator() (const SortingPair & sp1, const SortingPair & sp2) const
+  {
+    return sp1.second > sp2.second;
+  }
+};
 
 namespace reco
 {
@@ -9,10 +21,10 @@ namespace reco
 class PVSortingAlgo
 {
   public:
-    bool operator() (const reco::Vertex & v1, const reco::Vertex & v2) const;
+    std::vector<unsigned int> getSortedIndices(const edm::Handle<reco::VertexCollection> & primaryVertices) const;
 
   private:
-    double sumPtSquared(const reco::Vertex & v) const;
+    double sortingValue(const reco::Vertex & v) const;
 };
 
 }

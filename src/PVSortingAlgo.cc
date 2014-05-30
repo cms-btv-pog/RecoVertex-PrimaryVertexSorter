@@ -3,13 +3,27 @@
 using namespace reco;
 
 
-bool PVSortingAlgo::operator() (const Vertex & v1, const Vertex & v2) const
+std::vector<unsigned int> PVSortingAlgo::getSortedIndices(const edm::Handle<reco::VertexCollection> & primaryVertices) const
 {
-  return (sumPtSquared(v1) > sumPtSquared(v2));
+  // initialize (index,value) pairs vector
+  std::vector<SortingPair> sortingPairs;
+  // fill pairs
+  for(reco::VertexCollection::const_iterator it=primaryVertices->begin(); it!=primaryVertices->end(); ++it)
+    sortingPairs.push_back( std::make_pair( it - primaryVertices->begin(), sortingValue(*it) ) );
+  // sort pairs
+  std::sort(sortingPairs.begin(), sortingPairs.end(), sortByValue());
+
+  // initialize sorted indices vector
+  std::vector<unsigned int> sortedIndices;
+  // fill sorted indices vector
+  for(std::vector<SortingPair>::const_iterator it=sortingPairs.begin(); it!=sortingPairs.end(); ++it)
+    sortedIndices.push_back( it->first );
+
+  return sortedIndices;
 }
 
 
-double PVSortingAlgo::sumPtSquared(const Vertex & v) const
+double PVSortingAlgo::sortingValue(const Vertex & v) const
 {
   double sum = 0.;
   double pT;

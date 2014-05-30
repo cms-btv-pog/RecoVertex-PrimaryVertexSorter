@@ -57,6 +57,8 @@ class PrimaryVertexSorter : public edm::EDProducer {
 
       // ----------member data ---------------------------
       const edm::InputTag src_;
+
+      reco::PVSortingAlgo sortingAlgo;
 };
 
 //
@@ -103,10 +105,14 @@ PrimaryVertexSorter::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
    edm::Handle<reco::VertexCollection> primaryVertices;
    iEvent.getByLabel(src_,primaryVertices);
 
-   std::auto_ptr<reco::VertexCollection> pvs(new reco::VertexCollection(*primaryVertices));
+   // get sorted indices
+   std::vector<unsigned int> sortedIndices = sortingAlgo.getSortedIndices(primaryVertices);
 
-   if( pvs->size()>1 )
-      sort(pvs->begin(), pvs->end(), reco::PVSortingAlgo());
+   std::auto_ptr<reco::VertexCollection> pvs(new reco::VertexCollection());
+
+   // fill the sorted vertex collection
+   for(std::vector<unsigned int>::const_iterator it=sortedIndices.begin(); it!=sortedIndices.end(); ++it)
+     pvs->push_back( primaryVertices->at(*it) );
 
    // put sorted vertices into the event
    iEvent.put(pvs);
